@@ -1,38 +1,46 @@
 import { SubmitHandler, useForm } from 'react-hook-form';
-import { airportOptions } from '../utils/constants';
 import CalendarIcon from '../icons/CalendarIcon';
-import CheckIcon from '../icons/CheckIcon';
 import DepartureIcon from '../icons/DepartureIcon';
 import ReturnIcon from '../icons/ReturnIcon';
 import Picker from './Picker';
 import AirportSelect from './AirportSelect';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { SearchFormProps } from '../types';
+import { FC } from 'react';
 
-interface SearchFormProps {
-  origin: string;
-  destination: string;
-  departureDate: Date;
-  returnDate: Date;
-  service: boolean;
-}
+const FormSchema = z
+  .object({
+    origin: z.string({ required_error: 'Origin is required' }).length(3),
+    destination: z.string({ required_error: 'Destination is required' }).length(3),
+    departureDate: z.string({ required_error: 'Departure Date is required' }),
+    returnDate: z.string({ required_error: 'Return Date is required' }),
+    service: z.boolean(),
+  })
+  .refine((data) => data.origin !== data.destination, {
+    message: 'Destinatination cannot be the same as Origin',
+    path: ['destination'],
+  })
+  .refine((data) => new Date(data.departureDate).getDate() >= new Date(data.returnDate).getDate(), {
+    message: 'Return cannot be before Departure',
+    path: ['returnDate'],
+  });
 
-const FormSchema = z.object({
-  origin: z.string(),
-  destination: z.string(),
-  departureDate: z.string(),
-  returnDate: z.string(),
-});
 type FormSchemaType = z.infer<typeof FormSchema>;
 
-const SearchForm = () => {
+interface SearchProps {
+  updateSearch: (data: SearchFormProps) => void;
+}
+
+const SearchForm: FC<SearchProps> = ({ updateSearch }) => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    getValues,
+    formState: { errors, isSubmitting, isDirty, isValid },
   } = useForm<FormSchemaType>({ resolver: zodResolver(FormSchema) });
 
-  const onSubmit: SubmitHandler<FormSchemaType> = (data) => console.log('Form Data:', data);
+  const onSubmit: SubmitHandler<FormSchemaType> = (data) => updateSearch(data);
 
   return (
     <section className="w-full mx-auto">
@@ -42,55 +50,32 @@ const SearchForm = () => {
         {/* From City */}
         <div className="col-span-1 text-left">
           <AirportSelect label="From:" icon={<DepartureIcon />} {...register('origin')} disabled={isSubmitting} />
+          {errors.origin && <p className="text-sm text-red-700 mt-1">{errors.origin.message}</p>}
         </div>
         {/* To City */}
         <div className="col-span-1">
           <AirportSelect label="To:" icon={<ReturnIcon />} {...register('destination')} />
+          {errors.destination && <p className="text-sm text-red-700 mt-1">{errors.destination.message}</p>}
         </div>
         {/* Departure Date */}
         <div className="col-span-1">
           <Picker label="Departure:" icon={<CalendarIcon />} {...register('departureDate')} />
+          {errors.departureDate && <p className="text-sm text-red-700 mt-1">{errors.departureDate.message}</p>}
         </div>
         {/* Return Date  */}
         <div className="col-span-1">
           <Picker label="Return:" icon={<CalendarIcon />} {...register('returnDate')} />
+          {errors.returnDate && <p className="text-sm text-red-700 mt-1">{errors.returnDate.message}</p>}
         </div>
         {/* Service Type */}
         <div className="col-span-1 md:col-span-2">
-          <label className="text-lg font-medium text-white">Search Type:</label>
-          <div className="grid grid-cols-2 gap-8">
-            <div className="relative">
-              <input className="hidden group peer" type="radio" name="shippingOption" value="standard_alt" id="standard_alt" />
-
-              <label
-                className="block p-4 bg-white text-sm font-medium border border-gray-100 rounded-lg cursor-pointer transition-colors shadow-sm peer-checked:border-blue-500 hover:bg-gray-500 peer-checked:ring-1 peer-checked:ring-blue-500"
-                htmlFor="standard_alt">
-                <span>Best Match</span>
-
-                <span className="block mt-1 text-xs text-gray-500">* exact date match</span>
-              </label>
-
-              <CheckIcon />
-            </div>
-
-            <div className="relative">
-              <input className="hidden group peer" type="radio" name="shippingOption" value="next_day_alt" id="next_day_alt" />
-
-              <label
-                className="block p-4 bg-white text-sm font-medium border border-gray-100 rounded-lg cursor-pointer transition-colors shadow-sm peer-checked:border-blue-500 hover:bg-gray-500 peer-checked:ring-1 peer-checked:ring-blue-500"
-                htmlFor="next_day_alt">
-                <span>Amadeus Match</span>
-
-                <span className="block mt-1 text-xs text-gray-500">* best price in range</span>
-              </label>
-
-              <CheckIcon />
-            </div>
-          </div>
+          <input type="checkbox" {...register('service')} className="w-5 h-5 bg-white border-blue-600 rounded-md shadow-sm" />
+          <span className="pl-3 text-lg font-medium text-white">Amadeus Best Match</span>
         </div>
         <div className="flex justify-center items-end col-span-1 md:col-span-2">
           <button
             type="submit"
+            disabled={!isDirty && !isValid}
             className="block w-full mt-1 md:h-20 px-5 py-3 text-sm font-medium text-white bg-blue-600 rounded-lg">
             Search Flights
           </button>

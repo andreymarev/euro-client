@@ -1,19 +1,12 @@
-import { useQuery } from 'react-query';
+import { useState } from 'react';
+import { SearchFormProps } from '../types';
+import Results from './Results';
 import SearchForm from './SearchForm';
 
 const Home = () => {
-  const fecthPromos = async () => {
-    const data = await fetch(
-      'https://euro-server-production.up.railway.app/api/v1/flights/SOF/BER/?departureDate=2022-09-20&returnDate=2022-10-01&service=amadeusBestPrice'
-    );
-    const promos = await data.json();
-    console.log(promos);
-  };
-  const { isLoading, error } = useQuery('promos', fecthPromos);
+  const [searchData, setSearchData] = useState<any>(null);
 
-  if (isLoading) return <div>'Loading...'</div>;
-
-  if (error) return <div>'An error has occurred...'</div>;
+  const handleOnSearch = (data: SearchFormProps) => setSearchData(data);
 
   return (
     <>
@@ -24,11 +17,11 @@ const Home = () => {
 
             <p className="hidden max-w-md text-white/90 md:mt-6 md:text-lg md:leading-relaxed md:block">Where are you flying?</p>
 
-            <SearchForm />
+            <SearchForm updateSearch={(data) => handleOnSearch(data)} />
           </div>
         </div>
       </section>
-      <section>Results</section>
+      <section>{searchData && <Results searchData={searchData} />}</section>
     </>
   );
 };

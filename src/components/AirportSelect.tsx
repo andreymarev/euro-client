@@ -1,9 +1,8 @@
 import React from 'react';
 import { UseFormRegister } from 'react-hook-form';
-import { JsxElement } from 'typescript';
 import { SearchFormProps } from '../types';
 import { airportOptions } from '../utils/constants';
-interface FormValues {}
+
 const AirportSelect = React.forwardRef<
   HTMLSelectElement,
   { label: string; icon: any } & ReturnType<UseFormRegister<SearchFormProps>>
@@ -17,6 +16,9 @@ const AirportSelect = React.forwardRef<
         onChange={onChange}
         onBlur={onBlur}
         className="w-full p-4 pr-12 text-sm border-gray-200 rounded-lg shadow-sm cursor-pointer">
+        <option key="Empty Option" value="">
+          Select Airport
+        </option>
         {airportOptions.map((a) => (
           <option key={a.iata} value={a.iata}>
             {a.iata}

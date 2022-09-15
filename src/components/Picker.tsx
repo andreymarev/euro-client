@@ -7,7 +7,7 @@ import { SearchFormProps } from '../types';
 import { formatDate } from '../utils/formatDate';
 
 const Picker = React.forwardRef<HTMLInputElement, { label: string; icon: any } & ReturnType<UseFormRegister<SearchFormProps>>>(
-  ({ onChange, onBlur, name, label, icon }, ref) => {
+  ({ onBlur, name, label, icon }, ref) => {
     const [startDate, setStartDate] = useState(new Date());
     return (
       <>
@@ -19,7 +19,8 @@ const Picker = React.forwardRef<HTMLInputElement, { label: string; icon: any } &
             selected={startDate}
             onChange={(date: Date) => setStartDate(date)}
             onBlur={onBlur}
-            minDate={startDate}
+            minDate={new Date()}
+            dateFormat={'yyyy-MM-dd'}
           />
           <span className="absolute inset-y-0 inline-flex items-center right-10">{icon}</span>
         </div>

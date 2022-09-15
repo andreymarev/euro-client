@@ -1,5 +1,3 @@
-import React from 'react';
-
 const ReturnIcon = () => {
   return (
     <svg className="w-7 h-7 text-gray-400" viewBox="0 0 555.396 555.396" transform="rotate(40)">
