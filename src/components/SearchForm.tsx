@@ -36,7 +36,6 @@ const SearchForm: FC<SearchProps> = ({ updateSearch }) => {
   const {
     register,
     handleSubmit,
-    getValues,
     formState: { errors, isSubmitting, isDirty, isValid },
   } = useForm<FormSchemaType>({ resolver: zodResolver(FormSchema) });
 
